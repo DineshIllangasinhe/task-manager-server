@@ -1,0 +1,6 @@
+{
+  "development": {
+    "dialect": "sqlite",
+    "storage": "./task_managment_db.sqlite"
+  }
+}
