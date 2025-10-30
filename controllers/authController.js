@@ -1,5 +1,6 @@
 const { User } = require('../models');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { body, validationResult } = require('express-validator');
 
@@ -26,7 +27,38 @@ const register = async (req, res, next) => {
   }
 };
 
+const loginValidators = [
+  body('email').isEmail().withMessage('Valid email required'),
+  body('password').notEmpty().withMessage('Password required')
+];
+
+const login = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const ok = await user.checkPassword(password);
+    if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res.status(500).json({ error: 'Server misconfiguration: JWT_SECRET not set' });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, jwtSecret, { expiresIn: '8h' });
+    res.json({ token, user: user.toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   registerValidators,
-  register
+  register,
+  loginValidators,
+  login
 };
