@@ -7,5 +7,6 @@ router.get('/', authenticateJWT, taskCtrl.listTasksValidators, taskCtrl.listTask
 router.post('/', authenticateJWT, taskCtrl.createTaskValidators, taskCtrl.createTask);
 router.put('/:id', authenticateJWT, taskCtrl.updateTaskValidators, taskCtrl.updateTask);
 router.get('/:id', authenticateJWT, taskCtrl.getTask);
+router.delete('/:id', authenticateJWT, taskCtrl.deleteTask);
 
 module.exports = router;

@@ -116,6 +116,17 @@ const updateTask = async (req, res, next) => {
     }
 };
 
+const deleteTask = async (req, res, next) => {
+    try {
+      const task = await Task.findByPk(req.params.id);
+      if (!task) return res.status(404).json({ error: 'Task not found' });
+      await task.destroy();
+      res.status(200).json({ message: 'Task deleted successfully' });
+    } catch (err) {
+      next(err);
+    }
+};
+
 module.exports = {
     listTasksValidators,
     listTasks,
@@ -124,4 +135,5 @@ module.exports = {
     updateTaskValidators,
     updateTask,
     getTask,
+    deleteTask,
 };
