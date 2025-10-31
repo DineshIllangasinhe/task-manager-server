@@ -1,4 +1,6 @@
 const { Task, User } = require('../models');
+const { Sequelize } = require('sequelize');
+const { Op } = Sequelize;
 const { body, validationResult, param, query } = require('express-validator');
 
 const createTaskValidators = [
@@ -9,7 +11,15 @@ const createTaskValidators = [
 ];
 
 const listTasksValidators = [
-    query('completed').optional().isIn(['true', 'false'])
+    query('completed').optional().isIn(['true', 'false']),
+    query('assignedToId').optional().custom((value) => {
+        if (value === 'null' || value === null || value === '') return true;
+        const intValue = parseInt(value, 10);
+        if (isNaN(intValue) || intValue < 1) throw new Error('Invalid assignee ID');
+        return true;
+    }),
+    query('dueDateFrom').optional().isISO8601().toDate(),
+    query('dueDateTo').optional().isISO8601().toDate()
 ];
 
 const listTasks = async (req, res, next) => {
@@ -17,10 +27,27 @@ const listTasks = async (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
-        const { completed } = req.query;
+        const { completed, assignedToId, dueDateFrom, dueDateTo } = req.query;
         const where = {};
+        
         if (completed === 'true') where.completed = true;
         if (completed === 'false') where.completed = false;
+        if (assignedToId !== undefined && assignedToId !== null && assignedToId !== '') {
+            if (assignedToId === 'null') {
+                where.assignedToId = null;
+            } else {
+                where.assignedToId = parseInt(assignedToId, 10);
+            }
+        }
+        if (dueDateFrom || dueDateTo) {
+            where.dueDate = {};
+            if (dueDateFrom) {
+                where.dueDate[Op.gte] = new Date(dueDateFrom);
+            }
+            if (dueDateTo) {
+                where.dueDate[Op.lte] = new Date(dueDateTo);
+            }
+        }
 
         const tasks = await Task.findAll({
             where,
