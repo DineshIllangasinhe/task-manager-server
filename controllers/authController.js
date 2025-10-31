@@ -56,9 +56,19 @@ const login = async (req, res, next) => {
   }
 };
 
+const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.findAll();
+    res.json({ users });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   registerValidators,
   register,
   loginValidators,
-  login
+  login,
+  getUsers,
 };

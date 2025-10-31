@@ -1,0 +1,10 @@
+const express = require('express');
+const router = express.Router();
+const taskCtrl = require('../controllers/tasksController');
+const { authenticateJWT } = require('../middleware/authMiddleware');
+
+router.get('/', authenticateJWT, taskCtrl.listTasksValidators, taskCtrl.listTasks);
+router.post('/', authenticateJWT, taskCtrl.createTaskValidators, taskCtrl.createTask);
+router.put('/:id', authenticateJWT, taskCtrl.updateTaskValidators, taskCtrl.updateTask);
+
+module.exports = router;
