@@ -56,6 +56,19 @@ const login = async (req, res, next) => {
   }
 };
 
+const logout = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) return res.status(401).json({ error: 'Unauthorized' });
+      res.json({ message: 'Logged out successfully' });
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getUsers = async (req, res, next) => {
   try {
     const users = await User.findAll();
@@ -70,5 +83,6 @@ module.exports = {
   register,
   loginValidators,
   login,
+  logout,
   getUsers,
 };
