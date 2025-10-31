@@ -6,5 +6,6 @@ const { authenticateJWT } = require('../middleware/authMiddleware');
 router.get('/', authenticateJWT, taskCtrl.listTasksValidators, taskCtrl.listTasks);
 router.post('/', authenticateJWT, taskCtrl.createTaskValidators, taskCtrl.createTask);
 router.put('/:id', authenticateJWT, taskCtrl.updateTaskValidators, taskCtrl.updateTask);
+router.get('/:id', authenticateJWT, taskCtrl.getTask);
 
 module.exports = router;

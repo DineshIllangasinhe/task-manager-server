@@ -33,6 +33,18 @@ const listTasks = async (req, res, next) => {
     }
 };
 
+const getTask = async (req, res, next) => {
+    try {
+      const task = await Task.findByPk(req.params.id, {
+        include: [{ model: User, as: 'assignee', attributes: ['id','name','email'] }]
+      });
+      if (!task) return res.status(404).json({ error: 'Task not found' });
+      res.json({ task });
+    } catch (err) {
+      next(err);
+    }
+  };
+
 const createTask = async (req, res, next) => {
     try {
         const errors = validationResult(req);
@@ -111,4 +123,5 @@ module.exports = {
     createTask,
     updateTaskValidators,
     updateTask,
+    getTask,
 };
