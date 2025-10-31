@@ -144,7 +144,7 @@ const updateTask = async (req, res, next) => {
 };
 
 const deleteTask = async (req, res, next) => {
-    try {
+  try {
       const task = await Task.findByPk(req.params.id);
       if (!task) return res.status(404).json({ error: 'Task not found' });
       await task.destroy();
@@ -152,6 +152,26 @@ const deleteTask = async (req, res, next) => {
     } catch (err) {
       next(err);
     }
+};
+
+const getDashboardStats = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const [total, open, completed, assignedToMe] = await Promise.all([
+      Task.count(),
+      Task.count({ where: { completed: false } }),
+      Task.count({ where: { completed: true } }),
+      Task.count({ where: { assignedToId: userId } })
+    ]);
+    res.json({
+      total,
+      open,
+      completed,
+      assignedToMe
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports = {
@@ -163,4 +183,5 @@ module.exports = {
     updateTask,
     getTask,
     deleteTask,
+    getDashboardStats,
 };
